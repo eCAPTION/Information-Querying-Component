@@ -8,3 +8,4 @@ build
 # Faust data files
 gateway-data
 web_scraper-data
+nlp-data
