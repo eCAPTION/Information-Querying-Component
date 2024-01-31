@@ -1,0 +1,10 @@
+__pycache__
+venv
+dist
+build
+
+.vscode
+
+# Faust data files
+gateway-data
+web_scraper-data
