@@ -1,0 +1,2 @@
+git+https://github.com/eCAPTION/ecaption_utils.git
+trafilatura
