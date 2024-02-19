@@ -9,7 +9,7 @@ class GStarSearch:
     def __init__(self, kg: AbstractKnowledgeGraph) -> None:
         self.kg = kg
 
-    def get_lcag(self, L: Labels):
+    def get_lcag(self, L: Labels) -> set[Node]:
         """
         Apply G* Search Algorithm to get the Lowest Common Ancestor Graph outlined by the NewsLink paper.
 
@@ -18,6 +18,18 @@ class GStarSearch:
 
         Returns: Lowest common ancestor graph G* for given labels in KG
         """
+
+        # Getting labels that actually have a corresponding representation in the KG
+        label_to_node_names = {
+            label: self.kg.get_nodes_with_name_containing(label) for label in L
+        }
+        L = list(filter(lambda label: len(label_to_node_names[label]), L))
+
+        # Handle edge cases
+        if len(L) == 0:
+            return set()
+        elif len(L) == 1:
+            return set([label_to_node_names[L[0]][0]])
 
         # Initialize distances and priority queues
         distances: Distances = {label: {} for label in L}
@@ -28,7 +40,7 @@ class GStarSearch:
 
         # Setup each priority queue with set of nodes matching `label` with distance 0
         for label in L:
-            for matching_node in self.kg.get_nodes_with_name_containing(label):
+            for matching_node in label_to_node_names[label]:
                 p_queues[label].push(0, matching_node)
 
         results = {"candidates": {}, "min_depth": inf}
@@ -74,13 +86,10 @@ class GStarSearch:
                 if current_priority_in_queue == None:
                     # Node is reached from S(l_i) for the first time
                     p_queues[label].push(updated_priority, neighbor)
-                    parents[label][neighbor] = [
-                        node
-                    ]
-                elif (
-                    updated_priority <= current_priority_in_queue
-                ):
+                    parents[label][neighbor] = [node]
+                elif updated_priority <= current_priority_in_queue:
                     # Node is reached by an alternative shortest path
+                    # We add this parent too to increase the width of the embedding
                     parents[label][neighbor].append(node)
                 else:
                     # Node is reached by a longer path from S(l_i) -> ignore
@@ -118,9 +127,14 @@ class GStarSearch:
 
         results["candidates"][candidate_root_node] = G
         results["min_depth"] = depth
-    
+
     @classmethod
-    def __backtrack_for_label(cls, root_node: Node, parents_dict: dict[Node, list[Node]], result_set: set[Node]):
+    def __backtrack_for_label(
+        cls,
+        root_node: Node,
+        parents_dict: dict[Node, list[Node]],
+        result_set: set[Node],
+    ):
         q = Queue()
         q.put(root_node)
 

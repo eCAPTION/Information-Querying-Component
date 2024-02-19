@@ -9,6 +9,9 @@ class TestGStarSearch(unittest.TestCase):
     graph1 = MockKnowledgeGraph(MockGraphData.Graph1)
     gstar1 = GStarSearch(graph1)
 
+    def test_singleNode(self):
+        self.assertEqual(self.gstar1.get_lcag(["bird"]), set(["bird"]))
+
     def test_adjacentNodes(self):
         self.assertEqual(
             self.gstar1.get_lcag(["bird", "animal"]), set(["bird", "animal"])
@@ -50,6 +53,7 @@ class TestGStarSearch(unittest.TestCase):
                     "carnivore",
                     "tiger",
                     "cat",
+                    "bird",
                     "animal",
                 ]
             ),
@@ -72,6 +76,13 @@ class TestGStarSearch(unittest.TestCase):
             ],
         )
 
+    def test_labelDoesNotExist(self):
+        self.assertEqual(self.gstar1.get_lcag(["non_existent"]), set())
+
+    def test_oneExistingLabelAndOneNonExistingLabel(self):
+        result = self.gstar1.get_lcag(["ball", "non_existent"])
+        expected = set(["ball"])
+        self.assertEqual(result, expected)
         # self.graph1.draw()
 
 
