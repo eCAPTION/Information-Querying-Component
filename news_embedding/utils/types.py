@@ -7,4 +7,5 @@ Distance = int
 Distances = dict[Label, dict[Node, Distance]]
 P_Queues = dict[Label, PriorityQueue]
 Parents = dict[Label, dict[Node, list[Node]]]
-Candidates = dict[Node, set[Node]]
+Embedding_Adjlist = dict[Node, set[Node]]
+Candidates = dict[Node, Embedding_Adjlist]

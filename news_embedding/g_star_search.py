@@ -9,7 +9,7 @@ class GStarSearch:
     def __init__(self, kg: AbstractKnowledgeGraph) -> None:
         self.kg = kg
 
-    def get_lcag(self, L: Labels) -> set[Node]:
+    def get_lcag(self, L: Labels) -> Embedding_Adjlist:
         """
         Apply G* Search Algorithm to get the Lowest Common Ancestor Graph outlined by the NewsLink paper.
 
@@ -27,9 +27,9 @@ class GStarSearch:
 
         # Handle edge cases
         if len(L) == 0:
-            return set()
+            return {}
         elif len(L) == 1:
-            return set([label_to_node_names[L[0]][0]])
+            return {label_to_node_names[L[0]][0]: set()}
 
         # Initialize distances and priority queues
         distances: Distances = {label: {} for label in L}
@@ -120,12 +120,12 @@ class GStarSearch:
 
             depth = max(depth, distances[label][candidate_root_node])
 
-        # Generate embedding from candidate_root_node by backtracking on each label
-        G = set()
+        # Generate adjacency list from candidate_root_node by backtracking on each label
+        adjlist: Embedding_Adjlist = {}
         for label in L:
-            cls.__backtrack_for_label(candidate_root_node, parents[label], G)
+            cls.__backtrack_for_label(candidate_root_node, parents[label], adjlist)
 
-        results["candidates"][candidate_root_node] = G
+        results["candidates"][candidate_root_node] = adjlist
         results["min_depth"] = depth
 
     @classmethod
@@ -133,14 +133,22 @@ class GStarSearch:
         cls,
         root_node: Node,
         parents_dict: dict[Node, list[Node]],
-        result_set: set[Node],
+        adjlist: Embedding_Adjlist,
     ):
+        """
+        Perform backtracking from candidate root node back to starting label, while
+        building up the adjacency list `adjlist` of the subgraph embedding.
+        """
         q = Queue()
         q.put(root_node)
 
         while not q.empty():
             curr_node = q.get()
-            result_set.add(curr_node)
+
+            # Add node traversed to adjacency list if it does not yet exist
+            if not adjlist.get(curr_node):
+                adjlist[curr_node] = set()
+
             node_parents = parents_dict.get(curr_node)
 
             # Original node containing label is reached
@@ -149,6 +157,7 @@ class GStarSearch:
 
             for node in node_parents:
                 q.put(node)
+                adjlist[curr_node].add(node)
 
     @classmethod
     def __get_compactness_order(cls, root_node: Node, L: Labels, distances: Distances):
@@ -165,7 +174,7 @@ class GStarSearch:
     ):
         compactness_orders: dict[Node, list[Distance]] = {}
 
-        for root_node, G in candidates.items():
+        for root_node, adjlist in candidates.items():
             compactness_order = cls.__get_compactness_order(root_node, L, distances)
             compactness_orders[root_node] = compactness_order
 
