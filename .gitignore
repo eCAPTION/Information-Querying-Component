@@ -4,8 +4,10 @@ dist
 build
 
 .vscode
+.env
 
 # Faust data files
 gateway-data
 web_scraper-data
 nlp-data
+news_embedding-data

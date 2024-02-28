@@ -20,16 +20,16 @@ class GStarSearch:
         """
 
         # Getting labels that actually have a corresponding representation in the KG
-        label_to_node_names = {
-            label: self.kg.get_nodes_with_name_containing(label) for label in L
+        label_to_nodeids = {
+            label: self.kg.get_nodeids_with_name_containing(label) for label in L
         }
-        L = list(filter(lambda label: len(label_to_node_names[label]), L))
+        L = list(filter(lambda label: len(label_to_nodeids[label]), L))
 
         # Handle edge cases
         if len(L) == 0:
             return {}
         elif len(L) == 1:
-            return {label_to_node_names[L[0]][0]: set()}
+            return {label_to_nodeids[L[0]][0]: set()}
 
         # Initialize distances and priority queues
         distances: Distances = {label: {} for label in L}
@@ -40,15 +40,15 @@ class GStarSearch:
 
         # Setup each priority queue with set of nodes matching `label` with distance 0
         for label in L:
-            for matching_node in label_to_node_names[label]:
-                p_queues[label].push(0, matching_node)
+            for matching_node_id in label_to_nodeids[label]:
+                p_queues[label].push(0, matching_node_id)
 
         results = {"candidates": {}, "min_depth": inf}
 
         # LCA graph traversal
         while True:
-            node = self.__path_enumeration(p_queues, distances, parents)
-            self.__candidate_collection(node, L, distances, parents, results)
+            nodeid = self.__path_enumeration(p_queues, distances, parents)
+            self.__candidate_collection(nodeid, L, distances, parents, results)
 
             min_distance_across_p_queues = self.__get_min_distance_node_across_p_queues(
                 p_queues
@@ -72,11 +72,15 @@ class GStarSearch:
 
         Returns the node explored.
         """
-        label, node, dist = self.__pop_min_distance_node_and_label_across_p_queues(
+        label, nodeid, dist = self.__pop_min_distance_node_and_label_across_p_queues(
             p_queues
         )
 
-        for neighbor in self.kg.get_neighbors(node):
+        for neighbor in self.kg.get_neighbors(nodeid):
+            # Prevent infinite loop where a node cycles back to itself
+            if neighbor == nodeid:
+                continue
+
             # If node has not been visited before for this label, push it to the queue or update its priority if it already exists.
             # Once a node has been visited already for this label, that distance would have been smaller due to BFS-invariant on unweighted graphs - so we do nothing.
             if distances[label].get(neighbor) == None:
@@ -86,11 +90,11 @@ class GStarSearch:
                 if current_priority_in_queue == None:
                     # Node is reached from S(l_i) for the first time
                     p_queues[label].push(updated_priority, neighbor)
-                    parents[label][neighbor] = [node]
+                    parents[label][neighbor] = [nodeid]
                 elif updated_priority <= current_priority_in_queue:
                     # Node is reached by an alternative shortest path
                     # We add this parent too to increase the width of the embedding
-                    parents[label][neighbor].append(node)
+                    parents[label][neighbor].append(nodeid)
                 else:
                     # Node is reached by a longer path from S(l_i) -> ignore
                     continue
@@ -99,14 +103,14 @@ class GStarSearch:
         # due to the BFS invariant on unit edges.
         # Also, once a node is visited, it can't be visited again since we don't add visited nodes to the queue, and each queue
         # cannot have duplicate nodes.
-        distances[label][node] = dist
+        distances[label][nodeid] = dist
 
-        return node
+        return nodeid
 
     @classmethod
     def __candidate_collection(
         cls,
-        candidate_root_node: Node,
+        candidate_root_node: NodeID,
         L: Labels,
         distances: Distances,
         parents: Parents,
@@ -131,8 +135,8 @@ class GStarSearch:
     @classmethod
     def __backtrack_for_label(
         cls,
-        root_node: Node,
-        parents_dict: dict[Node, list[Node]],
+        root_node: NodeID,
+        parents_dict: dict[NodeID, list[NodeID]],
         adjlist: Embedding_Adjlist,
     ):
         """
@@ -160,7 +164,9 @@ class GStarSearch:
                 adjlist[curr_node].add(node)
 
     @classmethod
-    def __get_compactness_order(cls, root_node: Node, L: Labels, distances: Distances):
+    def __get_compactness_order(
+        cls, root_node: NodeID, L: Labels, distances: Distances
+    ):
         """
         Returns distance from root_node to each label in descending order.
         """
@@ -172,7 +178,7 @@ class GStarSearch:
     def __get_compactness_orders(
         cls, candidates: Candidates, L: Labels, distances: Distances
     ):
-        compactness_orders: dict[Node, list[Distance]] = {}
+        compactness_orders: dict[NodeID, list[Distance]] = {}
 
         for root_node, adjlist in candidates.items():
             compactness_order = cls.__get_compactness_order(root_node, L, distances)

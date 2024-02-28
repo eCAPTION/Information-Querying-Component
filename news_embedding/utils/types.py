@@ -2,10 +2,10 @@ from utils.priority_queue import PriorityQueue
 
 Label = str
 Labels = list[Label]
-Node = str
+NodeID = int
 Distance = int
-Distances = dict[Label, dict[Node, Distance]]
+Distances = dict[Label, dict[NodeID, Distance]]
 P_Queues = dict[Label, PriorityQueue]
-Parents = dict[Label, dict[Node, list[Node]]]
-Embedding_Adjlist = dict[Node, set[Node]]
-Candidates = dict[Node, Embedding_Adjlist]
+Parents = dict[Label, dict[NodeID, list[NodeID]]]
+Embedding_Adjlist = dict[NodeID, set[NodeID]]
+Candidates = dict[NodeID, Embedding_Adjlist]

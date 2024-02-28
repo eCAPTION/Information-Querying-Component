@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from utils.types import *
 
 
 class AbstractKnowledgeGraph(ABC):
@@ -7,7 +8,7 @@ class AbstractKnowledgeGraph(ABC):
     """
 
     @abstractmethod
-    def get_nodes_with_name_containing(self, label_name: str) -> list[str]:
+    def get_nodeids_with_name_containing(self, label_name: str) -> list[NodeID]:
         """
         Get the node IDs of nodes with names containing `label_name` via exact string matching.
 
@@ -16,7 +17,7 @@ class AbstractKnowledgeGraph(ABC):
         ...
 
     @abstractmethod
-    def get_neighbors(self, entity_id: str) -> list[str]:
+    def get_neighbors(self, entity_id: NodeID) -> list[NodeID]:
         """
         Get the entity IDs of the neighbors of node with `entity_id`.
 
