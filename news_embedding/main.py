@@ -7,8 +7,13 @@ from ecaption_utils.kafka.topics import Topic, get_event_type
 from g_star_search import GStarSearch
 from knowledge_graph.mongo_knowledge_graph import MongoKnowledgeGraph
 from utils.types import *
+import os
 
-app = get_faust_app(FaustApplication.NewsEmbedding)
+broker_url = os.environ.get("KAFKA_BROKER_URL")
+port = os.environ.get("NEWS_EMBEDDING_SERVICE")
+
+
+app = get_faust_app(FaustApplication.NewsEmbedding, broker_url=broker_url, port=port)
 topics = initialize_topics(
     app,
     [Topic.MAXIMAL_ENTITY_COOCCURRENCE_SET, Topic.NEWS_EMBEDDING],

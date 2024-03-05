@@ -1,0 +1,12 @@
+**/.git
+**/.env
+**/.env.staging
+**/.env.production
+**/venv
+
+# Faust data files
+**/gateway-data
+**/web_scraper-data
+**/nlp-data
+**/news_embedding-data
+**/news_search-data

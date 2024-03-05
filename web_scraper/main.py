@@ -5,8 +5,12 @@ from ecaption_utils.kafka.faust import (
 )
 from ecaption_utils.kafka.topics import Topic, get_event_type
 from utils import get_text_from_article_url
+import os
 
-app = get_faust_app(FaustApplication.WebScraper)
+broker_url = os.environ.get("KAFKA_BROKER_URL")
+port = os.environ.get("WEB_SCRAPER_SERVICE_PORT")
+
+app = get_faust_app(FaustApplication.WebScraper, broker_url=broker_url, port=port)
 topics = initialize_topics(
     app,
     [

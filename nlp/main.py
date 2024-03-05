@@ -5,8 +5,13 @@ from ecaption_utils.kafka.faust import (
 )
 from ecaption_utils.kafka.topics import Topic, get_event_type
 from utils import get_maximal_entity_cooccurrence_set
+import os
 
-app = get_faust_app(FaustApplication.NLP)
+broker_url = os.environ.get("KAFKA_BROKER_URL")
+port = os.environ.get("NLP_SERVICE_PORT")
+
+
+app = get_faust_app(FaustApplication.NLP, broker_url=broker_url, port=port)
 topics = initialize_topics(
     app,
     [Topic.NEW_ARTICLE_TEXT, Topic.MAXIMAL_ENTITY_COOCCURRENCE_SET],

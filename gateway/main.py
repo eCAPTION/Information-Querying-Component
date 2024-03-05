@@ -7,6 +7,12 @@ from ecaption_utils.kafka.faust import (
     FaustApplication,
 )
 from ecaption_utils.kafka.topics import Topic, get_event_type
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+broker_url = os.environ.get("KAFKA_BROKER_URL")
+port = os.environ.get("GATEWAY_SERVICE_PORT")
 
 
 async def lifespan(app: FastAPI):
@@ -19,7 +25,9 @@ async def lifespan(app: FastAPI):
     # On start up
     global topics
 
-    faust_app = get_faust_app(FaustApplication.Gateway)
+    faust_app = get_faust_app(
+        FaustApplication.Gateway, broker_url=broker_url, port=port
+    )
     topics = initialize_topics(faust_app, [Topic.NEW_ARTICLE_URL])
 
     # start the faust app in client mode
@@ -43,7 +51,7 @@ def read_root():
 async def related_articles(url: Union[str, None] = None):
     topic = Topic.NEW_ARTICLE_URL
     Event = get_event_type(topic)
-    event = Event(url=url)
+    event = Event(url=url, request_id=1)
 
     await topics[topic].send(value=event)
 
