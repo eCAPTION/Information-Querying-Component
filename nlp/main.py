@@ -28,6 +28,7 @@ async def handle_article_text(event_stream):
         publish_to = Topic.MAXIMAL_ENTITY_COOCCURRENCE_SET
         Event = get_event_type(publish_to)
         event = Event(
+            request_id=event.request_id,
             url=event.url,
             maximal_entity_cooccurrence_set=maximal_entity_cooccurrence_set,
         )

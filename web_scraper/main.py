@@ -4,7 +4,7 @@ from ecaption_utils.kafka.faust import (
     FaustApplication,
 )
 from ecaption_utils.kafka.topics import Topic, get_event_type
-from utils import get_text_from_article_url
+from utils import extract_article_url
 import os
 
 broker_url = os.environ.get("KAFKA_BROKER_URL")
@@ -15,7 +15,7 @@ topics = initialize_topics(
     app,
     [
         Topic.NEW_ARTICLE_URL,
-        Topic.NEW_ARTICLE_TEXT,
+        Topic.NEW_ARTICLE_EXTRACTED,
     ],
 )
 
@@ -23,10 +23,16 @@ topics = initialize_topics(
 @app.agent(topics[Topic.NEW_ARTICLE_URL])
 async def handle_new_article(event_stream):
     async for event in event_stream:
-        article_text = get_text_from_article_url(event.url)
+        extracted = extract_article_url(event.url)
 
-        publish_to = Topic.NEW_ARTICLE_TEXT
+        publish_to = Topic.NEW_ARTICLE_EXTRACTED
         Event = get_event_type(publish_to)
-        event = Event(url=event.url, text=article_text)
+        event = Event(
+            request_id=event.request_id,
+            title=extracted.get("title"),
+            description=extracted.get("description"),
+            text=extracted.get("text"),
+            image=extracted.get("image"),
+        )
 
         await topics[publish_to].send(value=event)

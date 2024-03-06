@@ -47,6 +47,7 @@ async def generate_embedding(event_stream):
         publish_to = Topic.NEWS_EMBEDDING
         Event = get_event_type(publish_to)
         event = Event(
+            request_id=event.request_id,
             url=event.url,
             adjlist=combined_adjlist,
             node_occurrences=node_occurrences,
