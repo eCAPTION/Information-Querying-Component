@@ -53,6 +53,8 @@ services:
     depends_on:
       kafka:
         condition: service_healthy
+      opensearch:
+        condition: service_healthy
     networks:
       - info-querying-component
     env_file: .env.docker
@@ -96,6 +98,11 @@ services:
       - info-querying-component
     environment:
       - discovery.type=single-node
+    healthcheck:
+      test: "curl --silent -ku 'admin:admin' https://opensearch:9200 >/dev/null || exit 1"
+      interval: 10s
+      timeout: 10s
+      retries: 10
 
 networks:
   info-querying-component:

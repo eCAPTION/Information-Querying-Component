@@ -14,11 +14,11 @@ port = os.environ.get("NLP_SERVICE_PORT")
 app = get_faust_app(FaustApplication.NLP, broker_url=broker_url, port=port)
 topics = initialize_topics(
     app,
-    [Topic.NEW_ARTICLE_TEXT, Topic.MAXIMAL_ENTITY_COOCCURRENCE_SET],
+    [Topic.NEW_ARTICLE_EXTRACTED, Topic.MAXIMAL_ENTITY_COOCCURRENCE_SET],
 )
 
 
-@app.agent(topics[Topic.NEW_ARTICLE_TEXT])
+@app.agent(topics[Topic.NEW_ARTICLE_EXTRACTED])
 async def handle_article_text(event_stream):
     async for event in event_stream:
         maximal_entity_cooccurrence_set = get_maximal_entity_cooccurrence_set(

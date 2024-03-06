@@ -4,7 +4,7 @@ from trafilatura import fetch_url, bare_extraction
 def extract_article_url(url: str) -> dict[str, str]:
     downloaded = fetch_url(url)
     if downloaded:
-        extracted: dict[str, str] = bare_extraction(downloaded, include_images=True)
+        extracted: dict[str, str] = bare_extraction(downloaded)
 
         return {
             "title": extracted.get("title"),

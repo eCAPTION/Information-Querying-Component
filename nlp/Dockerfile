@@ -6,4 +6,4 @@ COPY ./nlp .
 
 RUN pip3 install -r requirements.txt
 
-CMD ["sh", "-c", "exec faust -A main worker"]
+CMD ["sh", "-c", "spacy download en_core_web_sm && faust -A main worker"]
