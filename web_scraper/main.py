@@ -29,6 +29,7 @@ async def handle_new_article(event_stream):
         Event = get_event_type(publish_to)
         event = Event(
             request_id=event.request_id,
+            url=event.url,
             title=extracted.get("title"),
             description=extracted.get("description"),
             text=extracted.get("text"),
