@@ -46,6 +46,17 @@ services:
       - info-querying-component
     env_file: .env.docker
 
+  news_search:
+    build: 
+      context: .
+      dockerfile: ./news_search/Dockerfile
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks:
+      - info-querying-component
+    env_file: .env.docker
+
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     environment:

@@ -18,7 +18,10 @@ index_body = {
         }
     }
 }
-client.indices.create(OpenSearchClient.index_name, body=index_body)
+try:
+    client.indices.create(OpenSearchClient.index_name, body=index_body)
+except Exception as e:
+    print(f"Create index error: {e}")
 
 # Create mappings
 mapping_body = {
