@@ -6,6 +6,7 @@ build
 .vscode
 .env
 .env.docker
+.whitelist
 
 # Faust data files
 gateway-data
