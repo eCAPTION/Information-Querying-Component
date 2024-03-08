@@ -41,7 +41,16 @@ async def handle_new_article(event_stream):
             continue
 
         stripped_url = urljoin(event.url, parsed_url.path)
-        extracted = extract_article_url(stripped_url)
+
+        try:
+            extracted = extract_article_url(stripped_url)
+        except Exception as e:
+            await handle_error(
+                event.request_id,
+                error_type=FaustApplication.WebScraper,
+                error_message=str(e),
+            )
+            continue
 
         publish_to = Topic.NEW_ARTICLE_EXTRACTED
         Event = get_event_type(publish_to)

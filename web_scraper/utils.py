@@ -27,4 +27,4 @@ def extract_article_url(url: str) -> dict[str, str]:
         }
 
     else:
-        raise Exception("Invalid URL provided!")
+        raise Exception(f"Invalid URL provided! {url}")
