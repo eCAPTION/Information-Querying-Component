@@ -24,13 +24,16 @@ class OpenSearchClient:
         document["url"] = url
 
         if len(existing_documents):
-            id = existing_documents[0]["_id"]
-            self.client.update(self.index_name, id, {"doc": document})
+            for existing_document in existing_documents:
+                id = existing_document["_id"]
+                self.client.update(
+                    self.index_name, id, {"doc": document}, refresh="wait_for"
+                )
         else:
-            self.client.index(self.index_name, document)
+            self.client.index(self.index_name, document, refresh="wait_for")
 
         updated_document = self.search_match_query(url_query)[0]
-        return updated_document
+        return updated_document["_source"]
 
     def search_match_query(self, fields: dict):
         query = {"query": {"match": fields}}

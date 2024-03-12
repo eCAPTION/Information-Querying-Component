@@ -44,6 +44,11 @@ async def generate_embedding(event_stream):
         for key in combined_adjlist.keys():
             combined_adjlist[key] = list(combined_adjlist[key])
 
+        entity_labels = {
+            entity_id: kg.get_label_from_id(entity_id)
+            for entity_id in node_occurrences.keys()
+        }
+
         publish_to = Topic.NEWS_EMBEDDING
         Event = get_event_type(publish_to)
         event = Event(
@@ -51,6 +56,7 @@ async def generate_embedding(event_stream):
             url=event.url,
             adjlist=combined_adjlist,
             node_occurrences=node_occurrences,
+            entity_labels=entity_labels,
         )
 
         await topics[publish_to].send(value=event)

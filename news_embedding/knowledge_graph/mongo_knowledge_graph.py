@@ -3,6 +3,7 @@ from utils.types import *
 from dotenv import load_dotenv
 import os
 from pymongo import MongoClient
+from typing import Union
 
 load_dotenv()
 
@@ -41,6 +42,13 @@ class MongoKnowledgeGraph(AbstractKnowledgeGraph):
             return []
 
         return list(map(lambda r: int(r), result["n"]))
+
+    def get_label_from_id(self, entity_id: NodeID) -> Union[Label, None]:
+        document = self.kg_collection.find_one({"q": entity_id}, {"l": True})
+        if document:
+            return document["l"]
+        else:
+            return None
 
     def __get_knowledge_graph_collection(self):
         uri = os.environ.get("MONGODB_URI")

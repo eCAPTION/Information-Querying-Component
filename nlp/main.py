@@ -6,6 +6,9 @@ from ecaption_utils.kafka.faust import (
 from ecaption_utils.kafka.topics import Topic, get_event_type
 from utils import get_maximal_entity_cooccurrence_set
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 broker_url = os.environ.get("KAFKA_BROKER_URL")
 port = os.environ.get("NLP_SERVICE_PORT")
