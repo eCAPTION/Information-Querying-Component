@@ -98,6 +98,8 @@ services:
       - info-querying-component
     environment:
       - discovery.type=single-node
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_HTTP_AUTH_PASSWORD}
+    env_file: .env.docker
     healthcheck:
       test: "curl --silent -ku 'admin:admin' https://opensearch:9200 >/dev/null || exit 1"
       interval: 10s
