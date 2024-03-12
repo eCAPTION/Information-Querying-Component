@@ -1,15 +1,13 @@
 from functional import seq
-import spacy
+from refined.inference.processor import Refined
 
-_NER = spacy.load("en_core_web_sm")
+refined = Refined.from_pretrained(model_name="wikipedia_model", entity_set="wikipedia")
 
 
 def get_maximal_entity_cooccurrence_set(text: str):
     entity_sets = (
         _split_by_sentence_and_new_lines(text)
-        .map(_get_spacy_NER_output)
-        .map(_get_entities)
-        .map(_filter_by_NER_type)
+        .map(_get_named_entity_linking_entity_ids)
         .map(_get_entity_set)
         .to_list()
     )
@@ -26,29 +24,18 @@ def _split_by_sentence_and_new_lines(text: str):
     )
 
 
-def _get_spacy_NER_output(text_segment: str):
-    return _NER(text_segment)
-
-
-def _get_entities(ner_output):
-    return ner_output.ents
-
-
-def _filter_by_NER_type(entities):
-    excluded_types = [
-        "ORDINAL",
-        "DATE",
-        "CARDINAL",
-        "QUANTITY",
-        "TIME",
-        "MONEY",
-        "PERCENT",
+def _get_named_entity_linking_entity_ids(text_segment: str):
+    spans = refined.process_text(text_segment)
+    entity_ids = [
+        int(span.predicted_entity.wikidata_entity_id[1:])
+        for span in spans
+        if span.predicted_entity.wikidata_entity_id != None
     ]
-    return list(filter(lambda entity: entity.label_ not in excluded_types, entities))
+    return entity_ids
 
 
 def _get_entity_set(entities):
-    return frozenset(map(lambda entity: str(entity), entities))
+    return frozenset(entities)
 
 
 def _dedupe(ls: list):

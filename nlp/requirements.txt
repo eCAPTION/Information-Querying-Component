@@ -1,4 +1,4 @@
 https://github.com/eCAPTION/ecaption_utils/archive/refs/heads/main.zip
 PyFunctional
-spacy
+https://github.com/amazon-science/ReFinED/archive/refs/tags/V1.zip
 python-dotenv
