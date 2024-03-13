@@ -1,7 +1,9 @@
 from functional import seq
 from refined.inference.processor import Refined
 
-refined = Refined.from_pretrained(model_name="wikipedia_model", entity_set="wikipedia")
+refined = Refined.from_pretrained(
+    model_name="wikipedia_model", entity_set="wikipedia", data_dir="./.cache/refined"
+)
 
 
 def get_maximal_entity_cooccurrence_set(text: str):

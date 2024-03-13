@@ -8,6 +8,9 @@ build
 .env.docker
 .whitelist
 
+# NLP Component ReFinED library cached assets
+.cache
+
 # Faust data files
 gateway-data
 web_scraper-data
