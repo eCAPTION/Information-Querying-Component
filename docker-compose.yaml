@@ -1,7 +1,7 @@
-version: '3'
+version: "3"
 services:
   gateway:
-    build: 
+    build:
       context: .
       dockerfile: ./gateway/Dockerfile
     depends_on:
@@ -14,7 +14,7 @@ services:
     env_file: .env.docker
 
   web_scraper:
-    build: 
+    build:
       context: .
       dockerfile: ./web_scraper/Dockerfile
     depends_on:
@@ -25,7 +25,7 @@ services:
     env_file: .env.docker
 
   nlp:
-    build: 
+    build:
       context: .
       dockerfile: ./nlp/Dockerfile
     depends_on:
@@ -36,7 +36,7 @@ services:
     env_file: .env.docker
 
   news_embedding:
-    build: 
+    build:
       context: .
       dockerfile: ./news_embedding/Dockerfile
     depends_on:
@@ -47,13 +47,24 @@ services:
     env_file: .env.docker
 
   news_search:
-    build: 
+    build:
       context: .
       dockerfile: ./news_search/Dockerfile
     depends_on:
       kafka:
         condition: service_healthy
       opensearch:
+        condition: service_healthy
+    networks:
+      - info-querying-component
+    env_file: .env.docker
+
+  fact_querying:
+    build:
+      context: .
+      dockerfile: ./fact_querying/Dockerfile
+    depends_on:
+      kafka:
         condition: service_healthy
     networks:
       - info-querying-component
@@ -99,7 +110,6 @@ services:
     environment:
       - discovery.type=single-node
       - OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_HTTP_AUTH_PASSWORD}
-    env_file: .env.docker
     healthcheck:
       test: "curl --silent -ku 'admin:admin' https://opensearch:9200 >/dev/null || exit 1"
       interval: 10s

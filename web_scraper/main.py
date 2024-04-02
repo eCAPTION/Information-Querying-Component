@@ -7,7 +7,10 @@ from ecaption_utils.kafka.faust import (
 from ecaption_utils.kafka.topics import Topic, get_event_type
 from utils import extract_article_url, check_whitelist, is_https
 import os
+from dotenv import load_dotenv
 from urllib.parse import urlparse, urljoin
+
+load_dotenv()
 
 broker_url = os.environ.get("KAFKA_BROKER_URL")
 port = os.environ.get("WEB_SCRAPER_SERVICE_PORT")

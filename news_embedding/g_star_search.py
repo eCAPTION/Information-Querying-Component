@@ -76,7 +76,7 @@ class GStarSearch:
             p_queues
         )
 
-        for neighbor in self.kg.get_neighbors(nodeid):
+        for neighbor, property in self.kg.get_neighbors(nodeid):
             # Prevent infinite loop where a node cycles back to itself
             if neighbor == nodeid:
                 continue
@@ -90,11 +90,11 @@ class GStarSearch:
                 if current_priority_in_queue == None:
                     # Node is reached from S(l_i) for the first time
                     p_queues[label].push(updated_priority, neighbor)
-                    parents[label][neighbor] = [nodeid]
+                    parents[label][neighbor] = [(nodeid, property)]
                 elif updated_priority <= current_priority_in_queue:
                     # Node is reached by an alternative shortest path
                     # We add this parent too to increase the width of the embedding
-                    parents[label][neighbor].append(nodeid)
+                    parents[label][neighbor].append((nodeid, property))
                 else:
                     # Node is reached by a longer path from S(l_i) -> ignore
                     continue
@@ -136,7 +136,7 @@ class GStarSearch:
     def __backtrack_for_label(
         cls,
         root_node: NodeID,
-        parents_dict: dict[NodeID, list[NodeID]],
+        parents_dict: dict[NodeID, list[tuple[NodeID, PropertyID]]],
         adjlist: Embedding_Adjlist,
     ):
         """
@@ -159,9 +159,12 @@ class GStarSearch:
             if not node_parents:
                 continue
 
-            for node in node_parents:
-                q.put(node)
-                adjlist[curr_node].add(node)
+            for parent_id, property in node_parents:
+                q.put(parent_id)
+
+                if not adjlist.get(parent_id):
+                    adjlist[parent_id] = set()
+                adjlist[parent_id].add((curr_node, property))
 
     @classmethod
     def __get_compactness_order(

@@ -63,6 +63,7 @@ async def handle_embedding(event_stream):
             adjlist=event.adjlist,
             node_occurrences=event.node_occurrences,
             entity_labels=event.entity_labels,
+            property_labels=event.property_labels,
         )
 
         await topics[publish_to].send(value=event)

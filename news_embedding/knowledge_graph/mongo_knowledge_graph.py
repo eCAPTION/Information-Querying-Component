@@ -21,7 +21,9 @@ class MongoKnowledgeGraph(AbstractKnowledgeGraph):
     """
 
     def __init__(self) -> None:
-        self.kg_collection = self.__get_knowledge_graph_collection()
+        kg_collection, properties_collection = self.__get_knowledge_graph_collection()
+        self.kg_collection = kg_collection
+        self.properties_collection = properties_collection
 
     def get_nodeids_with_name_containing(self, label_name: str) -> list[NodeID]:
         """
@@ -32,7 +34,7 @@ class MongoKnowledgeGraph(AbstractKnowledgeGraph):
         results = self.kg_collection.find({"q": label_name})
         return list(map(lambda r: int(r["q"]), results))
 
-    def get_neighbors(self, entity_id: NodeID) -> list[NodeID]:
+    def get_neighbors(self, entity_id: NodeID) -> list[tuple[NodeID, PropertyID]]:
         """
         Get neighboring nodeids for `entity_id`.
         """
@@ -41,10 +43,17 @@ class MongoKnowledgeGraph(AbstractKnowledgeGraph):
         if result == None:
             return []
 
-        return list(map(lambda r: int(r), result["n"]))
+        return list(map(lambda r: (int(r["e"]), int(r["p"])), result["n"]))
 
     def get_label_from_id(self, entity_id: NodeID) -> Union[Label, None]:
         document = self.kg_collection.find_one({"q": entity_id}, {"l": True})
+        if document:
+            return document["l"]
+        else:
+            return None
+
+    def get_property_from_id(self, property_id: PropertyID) -> Union[Label, None]:
+        document = self.properties_collection.find_one({"p": property_id}, {"l": True})
         if document:
             return document["l"]
         else:
@@ -54,7 +63,9 @@ class MongoKnowledgeGraph(AbstractKnowledgeGraph):
         uri = os.environ.get("MONGODB_URI")
         port = int(os.environ.get("MONGODB_PORT"))
         database = os.environ.get("MONGODB_DATABASE_NAME")
-        collection = os.environ.get("MONGODB_KNOWLEDGE_GRAPH_COLLECTION")
+        kg_collection = os.environ.get("MONGODB_KNOWLEDGE_GRAPH_COLLECTION")
+        properties_collection = os.environ.get("MONGODB_PROPERTIES_COLLECTION")
 
         client = MongoClient(uri, port)
-        return client[database][collection]
+        db_client = client[database]
+        return (db_client[kg_collection], db_client[properties_collection])

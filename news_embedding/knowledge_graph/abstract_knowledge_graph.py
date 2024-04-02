@@ -17,7 +17,7 @@ class AbstractKnowledgeGraph(ABC):
         ...
 
     @abstractmethod
-    def get_neighbors(self, entity_id: NodeID) -> list[NodeID]:
+    def get_neighbors(self, entity_id: NodeID) -> list[tuple[NodeID, PropertyID]]:
         """
         Get the entity IDs of the neighbors of node with `entity_id`.
 
