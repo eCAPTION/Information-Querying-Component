@@ -8,6 +8,7 @@ from tests.mocks.data.files_enum import MockGraphData
 class TestGStarSearch(unittest.TestCase):
     graph1 = MockKnowledgeGraph(MockGraphData.Graph1)
     gstar1 = GStarSearch(graph1)
+    dummy_p_id = 1000
 
     def test_singleNode(self):
         adjlist = self.gstar1.get_lcag(["bird"])
@@ -17,8 +18,8 @@ class TestGStarSearch(unittest.TestCase):
     def test_adjacentNodes(self):
         adjlist = self.gstar1.get_lcag(["bird", "animal"])
         possible_results = [
-            {"bird": set(["animal"]), "animal": set()},
-            {"bird": set(), "animal": set(["bird"])},
+            {"bird": set([("animal", self.dummy_p_id)]), "animal": set()},
+            {"bird": set(), "animal": set([("bird", self.dummy_p_id)])},
         ]
         self.assertIn(adjlist, possible_results)
 
@@ -26,16 +27,18 @@ class TestGStarSearch(unittest.TestCase):
         adjlist = self.gstar1.get_lcag(["ball", "cat"])
         possible_results = [
             {
-                "animal": set(["cat", "dog"]),  # animal as root
-                "dog": set(["ball"]),
-                "cat": set(),
-                "ball": set(),
+                # animal as root
+                "ball": set([("dog", self.dummy_p_id)]),
+                "dog": set([("animal", self.dummy_p_id)]),
+                "cat": set([("animal", self.dummy_p_id)]),
+                "animal": set(),
             },
             {
-                "dog": set(["ball", "animal"]),  # dog as root
-                "animal": set(["cat"]),
-                "cat": set(),
-                "ball": set(),
+                # dog as root
+                "ball": set([("dog", self.dummy_p_id)]),
+                "animal": set([("dog", self.dummy_p_id)]),
+                "cat": set([("animal", self.dummy_p_id)]),
+                "dog": set(),
             },
         ]
         self.assertIn(adjlist, possible_results)
@@ -43,46 +46,47 @@ class TestGStarSearch(unittest.TestCase):
     def test_widthOfEmbedding_shouldIncludeAllShortestPaths(self):
         adjlist = self.gstar1.get_lcag(["ball", "herbivore"])
         expected = {
-            "animal": set(["dog", "elephant", "goat", "giraffe"]),
-            "dog": set(["ball"]),
-            "elephant": set(["herbivore"]),
-            "goat": set(["herbivore"]),
-            "giraffe": set(["herbivore"]),
-            "herbivore": set(),
-            "ball": set(),
+            # animal as root
+            "ball": set([("dog", self.dummy_p_id)]),
+            "dog": set([("animal", self.dummy_p_id)]),
+            "herbivore": set([("elephant", self.dummy_p_id), ("giraffe", self.dummy_p_id), ("goat", self.dummy_p_id)]),
+            "elephant": set([("animal", self.dummy_p_id)]),
+            "giraffe": set([("animal", self.dummy_p_id)]),
+            "goat": set([("animal", self.dummy_p_id)]),
+            "animal": set(),
         }
         self.assertEqual(adjlist, expected)
 
     def test_multipleWidths_shouldIncludeAllShortestPaths(self):
         adjlist = self.gstar1.get_lcag(["ball", "carnivore", "herbivore"])
         expected = {
-            "animal": set(
-                ["tiger", "lion", "cat", "bird", "dog", "goat", "giraffe", "elephant"]
-            ),
-            "tiger": set(["carnivore"]),
-            "lion": set(["carnivore"]),
-            "cat": set(["carnivore"]),
-            "bird": set(["carnivore"]),
-            "dog": set(["ball"]),
-            "goat": set(["herbivore"]),
-            "giraffe": set(["herbivore"]),
-            "elephant": set(["herbivore"]),
-            "carnivore": set(),
-            "herbivore": set(),
-            "ball": set(),
+            # animal as root
+            "ball": set([("dog", self.dummy_p_id)]),
+            "herbivore": set([("elephant", self.dummy_p_id), ("giraffe", self.dummy_p_id), ("goat", self.dummy_p_id)]),
+            "carnivore": set([("cat", self.dummy_p_id), ("tiger", self.dummy_p_id), ("lion", self.dummy_p_id), ("bird", self.dummy_p_id)]),
+            "cat": set([("animal", self.dummy_p_id)]),
+            "tiger": set([("animal", self.dummy_p_id)]),
+            "lion": set([("animal", self.dummy_p_id)]),
+            "elephant": set([("animal", self.dummy_p_id)]),
+            "giraffe": set([("animal", self.dummy_p_id)]),
+            "goat": set([("animal", self.dummy_p_id)]),
+            "dog": set([("animal", self.dummy_p_id)]),
+            "bird": set([("animal", self.dummy_p_id)]),
+            "animal": set(),
         }
         self.assertEqual(adjlist, expected)
 
     def test_rootNodeIsSameAsOneOfStartingLabelNodes_shouldReturnCorrectly(self):
         adjlist = self.gstar1.get_lcag(["ball", "animal", "herbivore"])
         expected = {
-            "animal": set(["dog", "elephant", "giraffe", "goat"]),
-            "dog": set(["ball"]),
-            "elephant": set(["herbivore"]),
-            "goat": set(["herbivore"]),
-            "giraffe": set(["herbivore"]),
-            "herbivore": set(),
-            "ball": set(),
+            # animal is root
+            "herbivore": set([("elephant", self.dummy_p_id), ("giraffe", self.dummy_p_id), ("goat", self.dummy_p_id)]),
+            "elephant": set([("animal", self.dummy_p_id)]),
+            "giraffe": set([("animal", self.dummy_p_id)]),
+            "goat": set([("animal", self.dummy_p_id)]),
+            "ball": set([("dog", self.dummy_p_id)]),
+            "dog": set([("animal", self.dummy_p_id)]),
+            "animal": set(),
         }
         self.assertEqual(adjlist, expected)
 
@@ -90,30 +94,34 @@ class TestGStarSearch(unittest.TestCase):
         adjlist = self.gstar1.get_lcag(["lion", "omnivore"])
         possible_results = [
             {
-                "bird": set(["omnivore", "carnivore", "animal"]),  # bird as root node
-                "carnivore": set(["lion"]),
-                "animal": set(["lion"]),
-                "omnivore": set(),
-                "lion": set(),
+                # bird as root
+                "lion": set([("carnivore", self.dummy_p_id), ("animal", self.dummy_p_id)]),
+                "carnivore": set([("bird", self.dummy_p_id)]),
+                "omnivore": set([("bird", self.dummy_p_id)]),
+                "animal": set([("bird", self.dummy_p_id)]),
+                "bird": set(),
             },
             {
-                "dog": set(["omnivore", "animal"]),  # dog as root node
-                "animal": set(["lion"]),
-                "omnivore": set(),
-                "lion": set(),
+                # dog as root
+                "lion": set([("animal", self.dummy_p_id)]),
+                "animal": set([("dog", self.dummy_p_id)]),
+                "omnivore": set([("dog", self.dummy_p_id)]),
+                "dog": set(),
             },
             {
-                "animal": set(["bird", "lion", "dog"]),  # animal as root
-                "bird": set(["omnivore"]),
-                "dog": set(["omnivore"]),
-                "omnivore": set(),
-                "lion": set(),
+                # animal as root
+                "lion": set([("animal", self.dummy_p_id)]),
+                "omnivore": set([("dog", self.dummy_p_id), ("bird", self.dummy_p_id)]),
+                "bird": set([("animal", self.dummy_p_id)]),
+                "dog": set([("animal", self.dummy_p_id)]),
+                "animal": set(),
             },
             {
-                "carnivore": set(["bird", "lion"]),  # carnivore as root
-                "bird": set(["omnivore"]),
-                "omnivore": set(),
-                "lion": set(),
+                # carnivore as root
+                "lion": set([("carnivore", self.dummy_p_id)]),
+                "omnivore": set([("bird", self.dummy_p_id)]),
+                "bird": set([("carnivore", self.dummy_p_id)]),
+                "carnivore": set(),
             },
         ]
         self.assertIn(adjlist, possible_results)

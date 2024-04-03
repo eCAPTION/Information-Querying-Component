@@ -20,8 +20,9 @@ class MockKnowledgeGraph(AbstractKnowledgeGraph):
 
         return list(filtered_nodes)
 
-    def get_neighbors(self, entity_id: NodeID) -> list[NodeID]:
-        return self.G.neighbors(entity_id)
+    def get_neighbors(self, entity_id: NodeID) -> list[tuple[NodeID, PropertyID]]:
+        dummy_property = 1000
+        return [(neighbor, dummy_property) for neighbor in self.G.neighbors(entity_id)]
 
     def draw(self):
         """
